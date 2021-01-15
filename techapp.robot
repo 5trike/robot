@@ -1,7 +1,6 @@
 *** Settings ***
-Library  BuiltIn
+Library    BuiltIn
 Library    AppiumLibrary
-Library   Process
 
 *** Variables ***
 ${REMOTE_URL}     http://127.0.0.1:4723/wd/hub
@@ -14,15 +13,7 @@ ${PACKAGE_NAME}     com.electrolux.ecp.client.sdk.app.selector
 ${TIMEWAIT}   60
 
 *** Keywords ***
-Start Appium
-  Sleep  1s
-  #Process.Start Process    appium      stdout=appium_stdout.txt   
-  #-a 127.0.0.1 -p 4723  --shell  --session-override
-
-Close Appium
-    Sleep  1s
-
-Open techapp
+Start
   AppiumLibrary.Open Application   ${REMOTE_URL}
   ...   platformName=${PLATFORM_NAME}
   ...   deviceName=${DEVICE_NAME}
@@ -36,23 +27,23 @@ Open techapp
   ...   accept_next_alert=false
   Login  eluxtester16@gmail.com  Elux123456  NA  LATAM stage  Frigidaire
 
-Close techapp
-  AppiumLibrary.Log Source
+End
   AppiumLibrary.Close Application
+  Sleep  5s
 
 eclick    #Wait and click
-  [Arguments]   ${loc}     
+  [Arguments]   ${loc}    ${TIMEWAIT}=90
   AppiumLibrary.Wait Until Element Is Visible   ${loc}    ${TIMEWAIT}
   AppiumLibrary.Click Element    ${loc} 
 
 
 bclick    #Wait and click
-  [Arguments]   ${loc}     
+  [Arguments]   ${loc}    ${TIMEWAIT}=90
   AppiumLibrary.Wait Until Element Is Visible   ${loc}    ${TIMEWAIT}
   AppiumLibrary.Click button    ${loc} 
 
 einput    #Wait, clear and input
-  [Arguments]   ${loc}   ${txt}  
+  [Arguments]   ${loc}   ${txt}    ${TIMEWAIT}=90
   AppiumLibrary.Wait Until Element Is Visible   ${loc}    ${TIMEWAIT}
   AppiumLibrary.Clear Text    ${loc}
   AppiumLibrary.Input text    ${loc}    ${txt}  
@@ -72,15 +63,13 @@ Login
 
 Onboarding
     [Arguments]   ${apname}  ${appas}
-    Sleep  3s
-    AppiumLibrary.Click Element At Coordinates    944    1948
-    Sleep   1s
-    AppiumLibrary.Click Element At Coordinates    944    1611
+    AppiumLibrary.Wait Until Element Is Visible  com.electrolux.ecp.client.sdk.app.selector:id/text_empty_list
+    eclick    com.electrolux.ecp.client.sdk.app.selector:id/fab
+    Sleep   2s
+    eclick    com.electrolux.ecp.client.sdk.app.selector:id/button_onboard_appliance
     Sleep  10s
     eclick    com.electrolux.ecp.client.sdk.app.selector:id/action_name
-    #eclick    com.android.settings:id/button1
     Sleep   7s
-    #AppiumLibrary.Wait Until Element Is Visible    com.android.settings:id/button1
     AppiumLibrary.Click Element    com.android.settings:id/button1
     eclick   //*[contains(@text,"${apname}")]
     eclick   com.electrolux.ecp.client.sdk.app.selector:id/text_input_password_toggle
@@ -88,27 +77,78 @@ Onboarding
     eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
 
 Enrolling
-    Sleep   15s
-    eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
-    #AppiumLibrary.Click Element At Coordinates    897    1150
-    #AppiumLibrary.Wait Until Element Is Visible    /hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.view.ViewGroup/android.widget.TextView[2]
-    #AppiumLibrary.Click Element   	/hierarchy/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.FrameLayout/android.view.ViewGroup/android.widget.TextView[2]
-    #AppiumLibrary.Click Element   //*[contains(@text, 'YES')]
+    #Sleep   15s
+    AppiumLibrary.Wait Until Element Is Visible   com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive   90
+    Sleep  7s  #wait for update something in the app!!
+    AppiumLibrary.Click Element    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
 
 Register    
-    Sleep  25s
     AppiumLibrary.Wait Until Element Is Visible   com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive    90
-    Sleep  7s
+    Sleep  7s    #wait for update something in the app!!
     AppiumLibrary.Click Element    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
-    
-    #AppiumLibrary.Wait Until Element Is Visible   com.electrolux.ecp.client.sdk.app.selector:id/edit_text_appliance_type
-    #try swipe
     Sleep  2s
+
     AppiumLibrary.Swipe    500    1700    500    300
-    #actions = TouchAction(driver)
-    #actions.press(x=, y=).move_to(x=, y=).release().perform()
     einput   com.electrolux.ecp.client.sdk.app.selector:id/edit_text_pref_language   en-EN
+    Sleep   2s
     eclick   com.electrolux.ecp.client.sdk.app.selector:id/button_submit_appliance_details
+
+Deregister
+    eclick    //android.widget.ImageView[@content-desc="More options"]
+    eclick    //*[contains(@text, 'Delete')]
+
+Choose appliance
+    eclick    //*[contains(@text, 's/n')]
+
+Wait until text   
+    [Arguments]   ${text}
+    AppiumLibrary.Wait Until Element Is Visible   //*[contains(@text,"${text}")]   60s
+
+Wait until element   
+    [Arguments]   ${text}
+    AppiumLibrary.Wait Until Element Is Visible   ${text}   60s
+
+Check error
+    [Arguments]   ${text}   ${loc}=com.electrolux.ecp.client.sdk.app.selector:id/md_title
+    AppiumLibrary.Wait Until Page Contains Element    //*[contains(@text,"Error")]   180
+    eclick   com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive    
+    Sleep  1s
+    #${alerttitle}=   AppiumLibrary.Get Element Attribute    com.electrolux.ecp.client.sdk.app.selector:id/md_title    text
+    #${alertcontent}=   AppiumLibrary.Get Element Attribute    com.electrolux.ecp.client.sdk.app.selector:id/md_content    text
+    AppiumLibrary.Capture Page Screenshot
+    AppiumLibrary.Log Source    DEBUG
+    AppiumLibrary.Element Should Contain Text    ${loc}   ${text}
+    eclick   com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
+
+  Onboarding choose AP
+    [Arguments]   ${apname}
+    AppiumLibrary.Wait Until Element Is Visible  com.electrolux.ecp.client.sdk.app.selector:id/text_empty_list
+    eclick    com.electrolux.ecp.client.sdk.app.selector:id/fab
+    Sleep   2s
+    eclick    com.electrolux.ecp.client.sdk.app.selector:id/button_onboard_appliance
+    Sleep  10s
+    eclick    com.electrolux.ecp.client.sdk.app.selector:id/action_name
+    Sleep   7s
+    AppiumLibrary.Click Element    com.android.settings:id/button1
+    eclick   //*[contains(@text,"${apname}")]
+
+  Onboarding enter password
+    [Arguments]   ${appas}
+    eclick   com.electrolux.ecp.client.sdk.app.selector:id/text_input_password_toggle
+    einput    com.electrolux.ecp.client.sdk.app.selector:id/text_wifi_password    ${appas}
+    eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
+
+  Onboarding
+      [Arguments]   ${apname}  ${appas}
+      Onboarding check AP   ${apname} 
+      Onboarding enter password   ${appas}
+      
+
+#com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultNegative
+#com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
+
+
+    
 
 
 
