@@ -27,7 +27,7 @@ Press
 Release
     [Arguments]   ${btnnum}
     ${btnAction}=    Set Variable  button_${btnnum}_release
-    Perform button    ${btnAction}    
+    Run Keyword If    ${BUTTON_PUSHER}=='servo'   Perform button    ${btnAction}    
 
 Release all
     Release   1

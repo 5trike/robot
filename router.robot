@@ -2,12 +2,14 @@
 Library  SeleniumLibrary
 
 *** Variables ***
-${URL_ROUTER}          http://admin:password@192.168.1.1/BKS_service.htm
+${URL_BLOCK_SERVICES}          http://admin:password@192.168.1.1/BKS_service.htm
+${URL_LAN_SETUP}        http://admin:password@192.168.1.1/LAN_lan.htm
+${BROWSER}    firefox
 
 *** Keywords ***
 Start
-    SeleniumLibrary.Open Browser    ${URL_ROUTER}  	${BROWSER}    
-    router.block port   0
+    SeleniumLibrary.Open Browser    ${URL_BLOCK_SERVICES}  	${BROWSER}    
+    block port   0
 
 End
     SeleniumLibrary.Close All Browsers
@@ -31,12 +33,26 @@ Setup block port
 
 Block port
     [Arguments]   ${port}
-    SeleniumLibrary.Go To    ${URL_ROUTER}
-    #SeleniumLibrary.Switch Window  NETGEAR Router WNDR3400v3
+    SeleniumLibrary.Go To    ${URL_BLOCK_SERVICES}
     Run Keyword If   '${port}'=='0'   Deblock port   ELSE   Setup block port   ${port}
     SeleniumLibrary.Click Element  //*[contains(@value, "Apply")]
 
+Turn off DHCP server
+    SeleniumLibrary.Go To    ${URL_LAN_SETUP} 
+    Click Element    name=dhcp_server
+    Click Element    xpath=//form[@id='target']/table/tbody/tr/td/button/span
+    Handle Alert
+
+Turn on DHCP server
+    SeleniumLibrary.Go To    ${URL_LAN_SETUP} 
+    Click Element    name=dhcp_server
+    Click Element    xpath=//form[@id='target']/table/tbody/tr/td/button/span
+
+*** Comments ***
 #*** Test Cases ***
-#Test
-#    Init
-#    Finish
+Test
+    Start
+    #Turn off DHCP server
+    #Sleep  30s
+    Turn on DHCP server
+    End
