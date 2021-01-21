@@ -31,6 +31,9 @@ Start
   ...   autoGrantPermissions=true
   ...   accept_next_alert=false
   ...   noReset=true
+
+  #${driver}  Get Current Application
+
   #Capture Screen Recording
   Login  eluxtester16@gmail.com  Elux123456  NA  LATAM stage  Frigidaire
 
@@ -100,13 +103,13 @@ Onboarding
 
 Enrolling
     #Sleep   15s
-    AppiumLibrary.Wait Until Element Is Visible   com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive   90
+    AppiumLibrary.Wait Until Element Is Visible   //*[contains(@text,"Appliance already enrolled")]     90   #com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive   90
     Sleep  7s  #wait for update something in the app!!
     AppiumLibrary.Click Element    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
 
 Register
     #Log to console    Wait button 
-    AppiumLibrary.Wait Until Element Is Visible   com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive    90
+    AppiumLibrary.Wait Until Element Is Visible      //*[contains(@text,"Enrolling successful")]    90
     #Log to console    Find button, wait 7 sec
     Sleep  7s    #wait for update something in the app!!
     AppiumLibrary.Click Element    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive

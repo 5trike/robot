@@ -16,8 +16,7 @@ End
 
 Deblock port
     SeleniumLibrary.Click Element  //*[contains(@value,"never")]
-    #SeleniumLibrary.Click Element  //*[contains(@value, "Apply")
-
+    
 Setup block port
     [Arguments]   ${port}
     SeleniumLibrary.Click Element    //*[contains(@name, 'Edit')]
@@ -38,21 +37,25 @@ Block port
     SeleniumLibrary.Click Element  //*[contains(@value, "Apply")]
 
 Turn off DHCP server
-    SeleniumLibrary.Go To    ${URL_LAN_SETUP} 
-    Click Element    name=dhcp_server
-    Click Element    xpath=//form[@id='target']/table/tbody/tr/td/button/span
-    Handle Alert
+    ConsoleDialogs.Pause Execution  message=Turn off DHCP. Hit [Return] to continue.
+    #SeleniumLibrary.Go To    ${URL_LAN_SETUP}
+    #Click Element    //*[@id="target"]/table/tbody/tr[2]/td/div/table/tbody/tr[10]/td/input
+    #Click Element    //form[@id='target']/table/tbody/tr/td/button/span
+    #Handle Alert
 
 Turn on DHCP server
-    SeleniumLibrary.Go To    ${URL_LAN_SETUP} 
-    Click Element    name=dhcp_server
-    Click Element    xpath=//form[@id='target']/table/tbody/tr/td/button/span
+    ConsoleDialogs.Pause Execution  message=Turn off DHCP. Hit [Return] to continue.
+    #SeleniumLibrary.Go To    ${URL_LAN_SETUP} 
+    #Sleep   5s
+    #Click Element    //*[@id="target"]/table/tbody/tr[2]/td/div/table/tbody/tr[10]/td/input
+    #Click Element    //form[@id='target']/table/tbody/tr/td/button/span
 
 *** Comments ***
 #*** Test Cases ***
 Test
     Start
-    #Turn off DHCP server
-    #Sleep  30s
+    Turn off DHCP server
+    Sleep  20
     Turn on DHCP server
+    Sleep  20
     End

@@ -47,20 +47,19 @@ Deregister
     buttons.Press    1    11
 
 *** Comments ***
-#*** Test Cases ***
+*** Test Cases ***
 TC-100
     [Documentation]    Provisioning and register appliance
     ...                Expected result: Appliance  provisioning, WiFi led ON
     [Tags]    Provisioning
     Onboarding   NETGEAR09   bluephoenix200
     techapp.Enrolling
-    Sleep  10m
     techapp.Register
     techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
     techapp.Check led state    ON
     Deregister
 
-*** Test Cases ***
+*** Comments ***
 TC-109
     [Documentation]    Provisioning and register appliance using AP with special characters
     ...                Expected result: Appliance  provisioning (check appliance connectivity state), WiFi led ON
@@ -94,7 +93,6 @@ TC-200
     techapp.eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
     techapp.eclick  //android.widget.ImageButton[@content-desc="Navigate up"]  
 
-*** Comments ***
 TC-201
     [Documentation]    Powercycle for 10 min registered appliance adn router
     ...                Expected result: Appliance automatically reconnect, WiFi led ON
@@ -114,6 +112,7 @@ TC-101
     Deregister
     techapp.Check led state    OFF
 
+
 TC-121
     [Documentation]    Onboarding with wrong password
     ...                Expected result: Appliance  not provisioning, WiFi led OFF (after 30 sec max), Error ECPW002
@@ -129,6 +128,7 @@ TC-102
     Onboarding     NETGEAR09   SHORT
     techapp.Check error    Error ECPW008
     techapp.Check led state    OFF
+
 
 TC-105
     [Documentation]    Enrolling when port 443 is blocked
@@ -157,12 +157,11 @@ TC-104
     ...                Expected result: Appliance  not provisioning, WiFi led OFF (after 30 sec max), Error ECPW005
     [Tags]    Onboarding    
     router.Turn off DHCP server
-    Sleep  10s
+    Sleep    10s
     Onboarding   NETGEAR09   bluephoenix200
     techapp.Check error    Error ECPW005
     router.Turn on DHCP server
     techapp.Check led state    OFF
-    ConsoleDialogs.Pause Execution  message=Turn on DHCP. Hit [Return] to continue.
 
 TC-106
     [Documentation]    Powercycle during onboarding before enter Wifi credentials
@@ -191,30 +190,6 @@ TC-108
     ConsoleDialogs.Pause Execution  message=Power cycle for appliance. Hit [Return] to continue.
     techapp.Check led state    ON
 
-TC-200
-    [Documentation]    Powercycle for 10 sec registered appliance
-    ...                Expected result: Appliance automatically reconnect, WiFi led ON
-    [Tags]    Operate    
-    ConsoleDialogs.Pause Execution  message=Appliance Power off. Hit [Return] to continue.
-    Log to console     Wait for 10 sec
-    Sleep  10s
-    ConsoleDialogs.Pause Execution  message=Appliance Power off. Hit [Return] to continue.
-    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
-    techapp.Check led state    ON
-
-TC-201
-    [Documentation]    Powercycle for 10 min registered appliance
-    ...                Expected result: Appliance automatically reconnect, WiFi led ON
-    [Tags]    Operate    
-    ConsoleDialogs.Pause Execution  message=Turn appliance Power OFF. Hit [Return] to continue.
-    Log to console     Wait for 10 min
-    Sleep  10m
-    ConsoleDialogs.Pause Execution  message=Turn appliance Power ON. Hit [Return] to continue.
-    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
-    techapp.Check led state    ON
-    
-
-
 TC-110
     [Documentation]    Verify NIU AP mode
     ...                Expected result: Appliance turn on AP (@E_ApplianceType_xxxxxxxxxx), WiFi led blinking
@@ -228,19 +203,6 @@ TC-111
     buttons.Press   1    6
 
 *** Comments ***
-
-
-Provisioning during power recycle
-    Onboarding with buttons   NETGEAR09   bluephoenix200
-    Sleep  380s
-
-TCop+
-    [Documentation]    Verify that registered appliance communicate with the cloud
-    ...                Expected result: Turn appliance on/off using appliance UA check that is reflect in the app and vice versa
-    [Tags]    Operate    
-    buttons.Press   2    1
-    techapp.Get value   ???
-
 TCop
     [Documentation]    Get parameters
     ...                Expected result: get values for all parameters
