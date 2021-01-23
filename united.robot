@@ -78,6 +78,7 @@ TC-200
     techapp.Find parameter   noPrnt.ExecuteCommand
     techapp.eclick    //*[contains(@text,"noPrnt.ExecuteCommand")]
     techapp.eclick    //*[contains(@text,"1 (ON)")]
+    techapp.eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
     Sleep  5s
     techapp.Find parameter   noPrnt.ExecuteCommand
     techapp.eclick    //*[contains(@text,"noPrnt.ExecuteCommand")]
