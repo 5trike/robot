@@ -4,7 +4,7 @@ Library  SeleniumLibrary
 *** Variables ***
 ${URL_BLOCK_SERVICES}          http://admin:password@192.168.1.1/BKS_service.htm
 ${URL_LAN_SETUP}        http://admin:password@192.168.1.1/LAN_lan.htm
-${BROWSER}    firefox
+#${BROWSER}    firefox
 
 *** Keywords ***
 Start

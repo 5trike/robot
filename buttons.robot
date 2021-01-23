@@ -52,7 +52,7 @@ Use muscles
 
 #*** Test Cases ***
 #Press btn1 for 6 sec
-#    Press   1    6
-#    Press   1    11
+#    Press   2    6
+#    Press   2    11
     
     

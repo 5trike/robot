@@ -14,7 +14,7 @@ Test Teardown    Test end
 
 *** Variables ***
 ${BROWSER}      headlessfirefox    #headlessfirefox         #firefox
-${BUTTON_PUSHER}   'manual'
+${BUTTON_PUSHER}   'servo'        #manual
 ${blockport}   0
 
 *** Keywords ***
@@ -38,16 +38,16 @@ Test end
 
 Onboarding
     [Arguments]   ${apname}   ${appass}
-    buttons.Press   1   6  
+    buttons.Press   2   7  
     techapp.Onboarding     ${apname}     ${appass}
 
 Deregister
     techapp.Choose appliance
     techapp.Deregister
-    buttons.Press    1    11
+    buttons.Press    2    11
 
 *** Comments ***
-*** Test Cases ***
+#*** Test Cases ***
 TC-100
     [Documentation]    Provisioning and register appliance
     ...                Expected result: Appliance  provisioning, WiFi led ON
@@ -59,7 +59,7 @@ TC-100
     techapp.Check led state    ON
     Deregister
 
-*** Comments ***
+*** Test Cases ***
 TC-109
     [Documentation]    Provisioning and register appliance using AP with special characters
     ...                Expected result: Appliance  provisioning (check appliance connectivity state), WiFi led ON
@@ -70,39 +70,21 @@ TC-109
     techapp.Wait until element   com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
 
 TC-200
-    [Documentation]    Powercycle for 10 sec registered appliance and router
-    ...                Expected result: Appliance automatically reconnect, WiFi led ON
-    [Tags]    Operate    
-    ConsoleDialogs.Pause Execution  message=Turn Power OFF Appliance and router. Hit [Return] to continue.
-    Log to console     Wait for 10 sec
-    Sleep  10s
-    ConsoleDialogs.Pause Execution  message=Turn Power ON Appliance and router. Hit [Return] to continue.
-    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
-    techapp.Check led state    ON
-
-TC-200
     [Documentation]    Check appliance communicate with the cloud
     ...                Expected result: Appliance  communicate with the cloud, WiFi led ON
     [Tags]    Operate    
-    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
     techapp.Choose appliance
-    buttons.Press    2    0
+    #buttons.Press    1    0
+    techapp.Find parameter   noPrnt.ExecuteCommand
+    techapp.eclick    //*[contains(@text,"noPrnt.ExecuteCommand")]
+    techapp.eclick    //*[contains(@text,"1 (ON)")]
+    Sleep  5s
     techapp.Find parameter   noPrnt.ExecuteCommand
     techapp.eclick    //*[contains(@text,"noPrnt.ExecuteCommand")]
     techapp.eclick    //*[contains(@text,"0 (OFF)")]
     techapp.eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
     techapp.eclick  //android.widget.ImageButton[@content-desc="Navigate up"]  
 
-TC-201
-    [Documentation]    Powercycle for 10 min registered appliance adn router
-    ...                Expected result: Appliance automatically reconnect, WiFi led ON
-    [Tags]    Operate    
-    ConsoleDialogs.Pause Execution  message=Turn Power OFF Appliance and router. Hit [Return] to continue.
-    Log to console     Wait for 10 min
-    Sleep  10m
-    ConsoleDialogs.Pause Execution  message=Turn Power ON Appliance and router. Hit [Return] to continue.
-    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
-    techapp.Check led state    ON
 
 TC-101
     [Documentation]    Check offboarding
@@ -121,6 +103,7 @@ TC-121
     techapp.Check error    Error ECPW002
     techapp.Check led state    OFF
 
+
 TC-102
     [Documentation]    Onboarding with short password
     ...                Expected result: Appliance  not provisioning, WiFi led OFF (after 30 sec max), Error ECPW008
@@ -128,7 +111,6 @@ TC-102
     Onboarding     NETGEAR09   SHORT
     techapp.Check error    Error ECPW008
     techapp.Check led state    OFF
-
 
 TC-105
     [Documentation]    Enrolling when port 443 is blocked
@@ -152,22 +134,11 @@ TC-103
     techapp.Check error    Error ECPW108
     techapp.Check led state    OFF    
 
-TC-104
-    [Documentation]    Onboarding with DHCP server is off
-    ...                Expected result: Appliance  not provisioning, WiFi led OFF (after 30 sec max), Error ECPW005
-    [Tags]    Onboarding    
-    router.Turn off DHCP server
-    Sleep    10s
-    Onboarding   NETGEAR09   bluephoenix200
-    techapp.Check error    Error ECPW005
-    router.Turn on DHCP server
-    techapp.Check led state    OFF
-
 TC-106
     [Documentation]    Powercycle during onboarding before enter Wifi credentials
     ...                Expected result: Appliance  not provisioning, AP turn off, WiFi led OFF
     [Tags]    Onboarding    
-    buttons.Press   1   6  
+    buttons.Press   2   7  
     techapp.Onboarding choose AP   NETGEAR09
     ConsoleDialogs.Pause Execution  message=Turn off appliance power. Hit [Return] to continue.
     techapp.Check led state    OFF
@@ -194,13 +165,46 @@ TC-110
     [Documentation]    Verify NIU AP mode
     ...                Expected result: Appliance turn on AP (@E_ApplianceType_xxxxxxxxxx), WiFi led blinking
     [Tags]    Onboarding    
-    buttons.Press   1    6
+    buttons.Press   2    7
 
 TC-111
     [Documentation]    Verify NIU AP mode turn off in 5 min
     ...                Expected result: After 5 min Appliance turn of AP (@E_ApplianceType_xxxxxxxxxx), WiFi led OFF
     [Tags]    Onboarding    
-    buttons.Press   1    6
+    buttons.Press   2    7
+
+TC-200
+    [Documentation]    Powercycle for 10 sec registered appliance and router
+    ...                Expected result: Appliance automatically reconnect, WiFi led ON
+    [Tags]    Operate    
+    ConsoleDialogs.Pause Execution  message=Turn Power OFF Appliance and router. Hit [Return] to continue.
+    Log to console     Wait for 10 sec
+    Sleep  10s
+    ConsoleDialogs.Pause Execution  message=Turn Power ON Appliance and router. Hit [Return] to continue.
+    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
+    techapp.Check led state    ON
+
+TC-201
+    [Documentation]    Powercycle for 10 min registered appliance adn router
+    ...                Expected result: Appliance automatically reconnect, WiFi led ON
+    [Tags]    Operate    
+    ConsoleDialogs.Pause Execution  message=Turn Power OFF Appliance and router. Hit [Return] to continue.
+    Log to console     Wait for 10 min
+    Sleep  10m
+    ConsoleDialogs.Pause Execution  message=Turn Power ON Appliance and router. Hit [Return] to continue.
+    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
+    techapp.Check led state    ON
+
+TC-104
+    [Documentation]    Onboarding with DHCP server is off
+    ...                Expected result: Appliance  not provisioning, WiFi led OFF (after 30 sec max), Error ECPW005
+    [Tags]    Onboarding    
+    router.Turn off DHCP server
+    Sleep    10s
+    Onboarding   NETGEAR09   bluephoenix200
+    techapp.Check error    Error ECPW005
+    router.Turn on DHCP server
+    techapp.Check led state    OFF
 
 *** Comments ***
 TCop
