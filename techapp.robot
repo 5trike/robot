@@ -8,11 +8,11 @@ Library  ConsoleDialogs
 #Resource  test.txt
 
 *** Variables ***
-${REMOTE_URL}     http://127.0.0.1:4723/wd/hub
+${REMOTE_URL}     http://127.0.0.1:4723/wd/hub   #http://0.0.0.0:4723/wd/hub  #http://127.0.0.1:4723/wd/hub
 
 ${PLATFORM_NAME}    Android
-#${DEVICE_NAME}    LGLS9935584bd   
-${DEVICE_NAME}   4731324a37333098
+#${DEVICE_NAME}    154589a0144b    #LGLS9935584bd   
+${DEVICE_NAME}  4731324a37333098    #192.168.1.7:5555    #4731324a37333098
 ${Activity_NAME}        com.electrolux.ecp.client.sdk.app.activity.LoginActivity
 ${PACKAGE_NAME}     com.electrolux.ecp.client.sdk.app.selector
 ${TIMEWAIT}   60
@@ -80,7 +80,7 @@ Input credentials
 
 Onboarding choose AP
   [Arguments]   ${apname}
-  AppiumLibrary.Wait Until Element Is Visible  com.electrolux.ecp.client.sdk.app.selector:id/text_empty_list
+  #AppiumLibrary.Wait Until Element Is Visible  com.electrolux.ecp.client.sdk.app.selector:id/text_empty_list    60s
   eclick    com.electrolux.ecp.client.sdk.app.selector:id/fab
   Sleep   2s
   eclick    com.electrolux.ecp.client.sdk.app.selector:id/button_onboard_appliance
@@ -103,9 +103,10 @@ Onboarding
 
 Enrolling
     #Sleep   15s
-    AppiumLibrary.Wait Until Element Is Visible   //*[contains(@text,"Appliance already enrolled")]     90   #com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive   90
-    Sleep  7s  #wait for update something in the app!!
-    AppiumLibrary.Click Element    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
+    eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive    90
+    #AppiumLibrary.Wait Until Element Is Visible   //*[contains(@text,"Appliance already enrolled")]     90   #com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive   90
+    #Sleep  7s  #wait for update something in the app!!
+    #AppiumLibrary.Click Element    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
 
 Register
     #Log to console    Wait button 
@@ -123,11 +124,8 @@ Deregister
     eclick    //*[contains(@text, 'Delete')]
 
 Choose appliance
-    ${isProv}    Wait Until Element Is Visible    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity    30s
-    Log To Console    ${isProv}
-    #Run Keyword If   
-    #eclick    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity  60s
-
+    Wait Until Element Is Visible    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity    60s
+    eclick    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity  60s
 
 Wait until text   
     [Arguments]   ${text}
@@ -213,15 +211,6 @@ Create dictionary if not exists
     &{dictish}    Create Dictionary
     Set Global Variable    ${dict}    ${dictish}
 
-Check led state
-    [Arguments]   ${state}
-    #${led}     Get Selection From User     Select WI-Fi LED state   ON   BLINKING   OFF
-    #${led}=   Set Variable If    '${led}'=='0'   ON    ${led}
-    #${led}=   Set Variable If    '${led}'=='1'   BLINKING    ${led}
-    #${led}=   Set Variable If    '${led}'=='2'   OFF    ${led}
-    #Should Be Equal    '${led}'    '${state}'
-    Sleep  0s
-
 Check element
     [Arguments]   ${loc}
     techapp.Wait until element  ${loc}
@@ -231,9 +220,12 @@ Check element
 #*** Test Cases ***
 TC01
     Start
+    Choose appliance
+    Find parameter  noPrnt.DefrostTemperature[3]
+
     eclick    //android.widget.ImageView[@content-desc="More options"]
     eclick    //*[contains(@text, 'Register appliance...')]
-    Find parameter  Preffered Language
+    
 
 *** Comments ***
     Choose appliance

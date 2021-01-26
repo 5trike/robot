@@ -5,6 +5,8 @@ Resource    router.robot
 Resource    techapp.robot
 Resource    buttons.robot
 Resource    techapp.robot
+Resource    plug.robot
+Resource     led.robot
 
 Suite Setup     Suite start
 Suite Teardown  Suite end  
@@ -30,6 +32,7 @@ Suite end
 
 Test start
     buttons.Release all
+    plug.On
     techapp.Start
     
 Test end
@@ -56,7 +59,7 @@ TC-100
     techapp.Enrolling
     techapp.Register
     techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
-    techapp.Check led state    ON
+    led.Check state    ON
     Deregister
 
 *** Test Cases ***
@@ -93,7 +96,7 @@ TC-101
     [Tags]    Provisioning    
     techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
     Deregister
-    techapp.Check led state    OFF
+    led.Check state    OFF
 
 
 TC-121
@@ -102,7 +105,7 @@ TC-121
     [Tags]    Onboarding    
     Onboarding     NETGEAR09   WRONG_PASSWORD
     techapp.Check error    Error ECPW002
-    techapp.Check led state    OFF
+    led.Check state    OFF
 
 
 TC-102
@@ -111,7 +114,7 @@ TC-102
     [Tags]    Onboarding    
     Onboarding     NETGEAR09   SHORT
     techapp.Check error    Error ECPW008
-    techapp.Check led state    OFF
+    led.Check state    OFF
 
 TC-105
     [Documentation]    Enrolling when port 443 is blocked
@@ -122,7 +125,7 @@ TC-105
     Onboarding     NETGEAR09   bluephoenix200
     techapp.Enrolling
     techapp.Check error    Error ECPW103
-    techapp.Check led state    OFF
+    led.Check state   OFF
 
 TC-103
     [Documentation]    Enrolling appliance with no internet
@@ -133,7 +136,7 @@ TC-103
     Onboarding     NETGEAR09   bluephoenix200
     techapp.Enrolling
     techapp.Check error    Error ECPW108
-    techapp.Check led state    OFF    
+    led.Check state    OFF    
 
 TC-106
     [Documentation]    Powercycle during onboarding before enter Wifi credentials
@@ -141,16 +144,20 @@ TC-106
     [Tags]    Onboarding    
     buttons.Press   2   7  
     techapp.Onboarding choose AP   NETGEAR09
-    ConsoleDialogs.Pause Execution  message=Turn off appliance power. Hit [Return] to continue.
-    techapp.Check led state    OFF
+    plug.Off
+    Sleep    5s
+    plug.On
+    led.Check state    OFF
 
 TC-107
     [Documentation]    Powercycle during onboarding after enter Wifi credentials
     ...                Expected result: Appliance  not provisioning, AP turn off, WiFi led OFF
     [Tags]    Onboarding    
     Onboarding   NETGEAR09   bluephoenix200
-    ConsoleDialogs.Pause Execution  message=Turn off appliance power. Hit [Return] to continue.
-    techapp.Check led state    OFF
+    plug.Off
+    Sleep    5s
+    plug.On
+    led.Check state    OFF
 
 TC-108
     [Documentation]    Powercycle in 10 sec after starting enrolling process
@@ -159,8 +166,10 @@ TC-108
     Onboarding   NETGEAR09   bluephoenix200
     techapp.Enrolling
     Sleep  10s
-    ConsoleDialogs.Pause Execution  message=Power cycle for appliance. Hit [Return] to continue.
-    techapp.Check led state    ON
+    plug.Off
+    Sleep    5s
+    plug.On
+    led.Check state    ON
 
 TC-110
     [Documentation]    Verify NIU AP mode
@@ -178,23 +187,22 @@ TC-200
     [Documentation]    Powercycle for 10 sec registered appliance and router
     ...                Expected result: Appliance automatically reconnect, WiFi led ON
     [Tags]    Operate    
-    ConsoleDialogs.Pause Execution  message=Turn Power OFF Appliance and router. Hit [Return] to continue.
-    Log to console     Wait for 10 sec
+    plug.Off
     Sleep  10s
-    ConsoleDialogs.Pause Execution  message=Turn Power ON Appliance and router. Hit [Return] to continue.
+    plug.On
     techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
-    techapp.Check led state    ON
+    led.Check state    ON
 
 TC-201
     [Documentation]    Powercycle for 10 min registered appliance adn router
     ...                Expected result: Appliance automatically reconnect, WiFi led ON
     [Tags]    Operate    
-    ConsoleDialogs.Pause Execution  message=Turn Power OFF Appliance and router. Hit [Return] to continue.
+    plug.Off
     Log to console     Wait for 10 min
     Sleep  10m
-    ConsoleDialogs.Pause Execution  message=Turn Power ON Appliance and router. Hit [Return] to continue.
+    plug.On
     techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
-    techapp.Check led state    ON
+    led.Check state   ON
 
 TC-104
     [Documentation]    Onboarding with DHCP server is off
@@ -205,7 +213,7 @@ TC-104
     Onboarding   NETGEAR09   bluephoenix200
     techapp.Check error    Error ECPW005
     router.Turn on DHCP server
-    techapp.Check led state    OFF
+    led.Check state    OFF
 
 *** Comments ***
 TCop
@@ -216,27 +224,21 @@ TCop
     techapp.Choose appliance
     techapp.Get value   noPrnt.IceDispenserState  #noPrnt.Ssid
     #Sleep  30
+    #Get value Verify Link Quality
+    #Get value Confirm NIUX Firmware Version
+    #Get value Confirm NIUX SW ANC version
+    #Get value Verify PNC number
+    #Get value Confirm Model Number
+    #Get value Confirm Serial Number
 
-Verify Link Quality
-Confirm NIUX Firmware Version
-Confirm NIUX SW ANC version
-Verify Factory Serialization
-Verify PNC number
-Confirm Model Number
-Confirm Serial Number
-Verify Turbo Refrig. and Turbo Freezer
-Verify Temperature Representation setting
-Verify Temperature Setting for Freezer and Refrigerator
-Verify Ice Maker
-Sabbath Mode
-VCZ cavity setting
-Child Lock
-Compressor
-Water Filter
-Appliance Alert 
-
-Wrong Network entry 
-    Onboarding with buttons     NETGEAR09-5G   bluephoenix200   #It's not wrong network!!
-    techapp.Enrolling
-    techapp.Register
-    Sleep  60s
+#Operate Verify Turbo Refrig. and Turbo Freezer
+#Operate Verify Temperature Representation setting
+#Operate Verify Temperature Setting for Freezer and Refrigerator
+#Operate Verify Ice Maker
+#Operate Sabbath Mode
+#Operate VCZ cavity setting
+#Operate Child Lock
+#Operate Compressor
+#Operate Water Filter
+#Operate Appliance Alert 
+#Verify Factory Serialization
