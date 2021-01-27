@@ -1,10 +1,10 @@
 *** Settings ***
 Library    BuiltIn
 Library    AppiumLibrary
-Library      XML
+Library    XML
 Library    Collections
 Library    OperatingSystem
-Library  ConsoleDialogs
+Library    ConsoleDialogs
 #Resource  test.txt
 
 *** Variables ***
@@ -37,7 +37,6 @@ Start
   #Capture Screen Recording
   Login  eluxtester16@gmail.com  Elux123456  NA  LATAM stage  Frigidaire
 
-
 End
   AppiumLibrary.Close Application
   #End Screen Recording
@@ -49,10 +48,10 @@ eclick    #Wait and click
   AppiumLibrary.Click Element    ${loc} 
 
 
-bclick    #Wait and click
-  [Arguments]   ${loc}    ${TIMEWAIT}=90
-  AppiumLibrary.Wait Until Element Is Visible   ${loc}    ${TIMEWAIT}
-  AppiumLibrary.Click button    ${loc} 
+#bclick    #Wait and click
+#  [Arguments]   ${loc}    ${TIMEWAIT}=90
+#  AppiumLibrary.Wait Until Element Is Visible   ${loc}    ${TIMEWAIT}
+#  AppiumLibrary.Click button    ${loc} 
 
 einput    #Wait, clear and input
   [Arguments]   ${loc}   ${txt}    ${TIMEWAIT}=90
@@ -162,70 +161,17 @@ Remove Screen Recording If Pass
 
 Scroll Down If Element Not Found
     [Arguments]   ${text}
-    #${keys}    Get attr from Webelements     //*[@resource-id="com.electrolux.ecp.client.sdk.app.selector:id/text_unit_name"]
-    #${values}   Get attr from Webelements      //*[@resource-id="com.electrolux.ecp.client.sdk.app.selector:id/text_unit_value"]
-    
-    #${dict}    Create dictionary from lists    ${keys}    ${values}
-
     Swipe By Percent    50    90    50    30
-    #Set Global Variable  ${t}  1
-#    Return From Keyword    ${dict}
-#    Log To Console    \n-------
-#    Log To Console    \nDICTIONARY:${dict}
     Page Should Contain Element  //*[contains(@text,"${text}")]
 
 Find parameter
     [Arguments]   ${text}
-    BuiltIn.Wait Until Keyword Succeeds    10x    100ms    Scroll Down If Element Not Found   ${text}    #${dict}
-#    eclick    //*[contains(@text,"${text}")]
-#    ${txt}    Get Source
-#    Log to Console  ${txt}
-#    Log To Console    \n${dict}[${text}]
-
-Get attr from Webelements
-    [Arguments]   ${loc}    ${attr}=text
-    ${items}   Get Webelements     ${loc}
-    ${return}    Create List  
-    FOR    ${item}     IN      @{items}
-    ${type}    Evaluate    type($item).__name__
-    ${next}    Set Variable If    '${type}'=='WebElement'  ${item.${attr}}
-    Append To List    ${return}    ${next}
-    END
-    Log To Console    \nLIST: ${loc} ${return}
-    Return From Keyword    ${return}
-
-Create dictionary from lists
-    [Arguments]   ${list1}    ${list2}
-    ${cnt}    Get length   ${list2}
-    Log To Console    ${t}
-    ${dictish}    Create Dictionary
-    FOR  ${i}  IN RANGE  ${cnt}
-    Log To Console    ${i} 
-    Set To Dictionary   ${dict}  ${list1}[${i}]  ${list2}[${i}]
-    Log To Console   
-    END
-    Log To Console    1 ${dict} 
-#    Return From Keyword    ${dict}
-
-Create dictionary if not exists
-    &{dictish}    Create Dictionary
-    Set Global Variable    ${dict}    ${dictish}
+    BuiltIn.Wait Until Keyword Succeeds    10x    100ms    Scroll Down If Element Not Found   ${text}
 
 Check element
     [Arguments]   ${loc}
-    techapp.Wait until element  ${loc}
+    Wait until element  ${loc}
     Element Should Be Visible    ${loc}
-
-*** Comments ***
-#*** Test Cases ***
-TC01
-    Start
-    Choose appliance
-    Find parameter  noPrnt.DefrostTemperature[3]
-
-    eclick    //android.widget.ImageView[@content-desc="More options"]
-    eclick    //*[contains(@text, 'Register appliance...')]
-    
 
 *** Comments ***
     Choose appliance
@@ -242,12 +188,3 @@ TC01
     eclick    //*[contains(@text,"0 (OFF)")]
     eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive 
     Sleep  20s
-    #Get value   noPrnt.Ssid
-    #eclick    com.electrolux.ecp.client.sdk.app.selector:id/text_components_count
-    #${keys}    Get attr from Webelements     //*[@resource-id="com.electrolux.ecp.client.sdk.app.selector:id/text_unit_name"]
-    #${values}   Get attr from Webelements      //*[@resource-id="com.electrolux.ecp.client.sdk.app.selector:id/text_unit_value"]
-    #${return}    Create dictionary from lists    ${keys}    ${values}
-    #${key}    Set Variable    noPrnt.TargetTemperature[3]
-    #Log To Console    \n${key} = ${return}[${key}] 
-    #Log Many
-    End

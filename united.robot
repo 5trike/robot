@@ -1,12 +1,13 @@
 *** Settings ***
-Library  ConsoleDialogs
-Library    BuiltIn
+Library     ConsoleDialogs
+Library     BuiltIn
 Resource    router.robot
 Resource    techapp.robot
 Resource    buttons.robot
 Resource    techapp.robot
 Resource    plug.robot
-Resource     led.robot
+Resource    led.robot
+Resource    parse.robot
 
 Suite Setup     Suite start
 Suite Teardown  Suite end  
@@ -15,14 +16,18 @@ Test Setup       Test start
 Test Teardown    Test end
 
 *** Variables ***
-${BROWSER}      headlessfirefox    #headlessfirefox         #firefox
-${BUTTON_PUSHER}   'servo'        #manual
-${blockport}   0
+${BROWSER}      firefox    #headlessfirefox         #firefox
+${BUTTON_PUSHER}   'human'        #manual
+${BLOCKPORT}   0
+@{INFOS}    noPrnt.ApplianceState    noPrnt.DoorState   noPrnt.SensorTemperature[3]    #apname, model, pnc, serial, Link Quality, NIUX Firmware Version, NIUX SW ANC version
+
+&{DICT}  name=value
 
 *** Keywords ***
 Suite start
+    Sleep    0
+    Set Global Variable    ${dict}    ()
     Set Library Search Order  AppiumLibrary  SeleniumLibrary
-    Set Global Variable    ${dicter}    ()
     router.Start
     buttons.Start   
 
@@ -31,12 +36,14 @@ Suite end
     router.End
 
 Test start
+    Sleep     0
     buttons.Release all
     plug.On
     techapp.Start
     
 Test end
-    Run Keyword if  '${blockport}'!='0'    router.block port   0 
+    Sleep     0
+    Run Keyword if  '${BLOCKPORT}'!='0'    router.block port   0 
     techapp.End
 
 Onboarding
@@ -62,7 +69,6 @@ TC-100
     led.Check state    ON
     Deregister
 
-*** Test Cases ***
 TC-109
     [Documentation]    Provisioning and register appliance using AP with special characters
     ...                Expected result: Appliance  provisioning (check appliance connectivity state), WiFi led ON
@@ -98,7 +104,6 @@ TC-101
     Deregister
     led.Check state    OFF
 
-
 TC-121
     [Documentation]    Onboarding with wrong password
     ...                Expected result: Appliance  not provisioning, WiFi led OFF (after 30 sec max), Error ECPW002
@@ -120,24 +125,36 @@ TC-105
     [Documentation]    Enrolling when port 443 is blocked
     ...                Expected result: Appliance not provisioning, WiFi led OFF, Error ECPW103
     [Tags]    Enrolling    
-    Set Test Variable   ${blockport}   443
-    router.block port   ${blockport}
+    Set Test Variable   ${BLOCKPORT}   443
+    router.block port   ${BLOCKPORT}
     Onboarding     NETGEAR09   bluephoenix200
     techapp.Enrolling
     techapp.Check error    Error ECPW103
+    buttons.Press   2   11
     led.Check state   OFF
 
 TC-103
     [Documentation]    Enrolling appliance with no internet
     ...                Expected result: Appliance  not provisioning, WiFi led OFF, 
     [Tags]    Enrolling    
-    Set Test Variable   ${blockport}    65535
-    router.block port   ${blockport}
+    Set Test Variable   ${BLOCKPORT}    65535
+    router.block port   ${BLOCKPORT}
     Onboarding     NETGEAR09   bluephoenix200
     techapp.Enrolling
     techapp.Check error    Error ECPW108
+    buttons.Press   2   11
     led.Check state    OFF    
 
+*** Test Cases ***
+prsxml
+    parse.Source    Source here 
+    FOR  ${info}    IN     @{INFOS}
+    Log to console    ${info} : ${dict}[${info}]
+    #Log to console  ${interesting} ${dict}
+    #Try    ${xml}
+    END
+
+*** Comments ***
 TC-106
     [Documentation]    Powercycle during onboarding before enter Wifi credentials
     ...                Expected result: Appliance  not provisioning, AP turn off, WiFi led OFF
@@ -216,21 +233,6 @@ TC-104
     led.Check state    OFF
 
 *** Comments ***
-TCop
-    [Documentation]    Get parameters
-    ...                Expected result: get values for all parameters
-    [Tags]    Operate    
-    Set Global Variable    ${t}    0
-    techapp.Choose appliance
-    techapp.Get value   noPrnt.IceDispenserState  #noPrnt.Ssid
-    #Sleep  30
-    #Get value Verify Link Quality
-    #Get value Confirm NIUX Firmware Version
-    #Get value Confirm NIUX SW ANC version
-    #Get value Verify PNC number
-    #Get value Confirm Model Number
-    #Get value Confirm Serial Number
-
 #Operate Verify Turbo Refrig. and Turbo Freezer
 #Operate Verify Temperature Representation setting
 #Operate Verify Temperature Setting for Freezer and Refrigerator
