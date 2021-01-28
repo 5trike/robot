@@ -7,108 +7,112 @@ Resource    buttons.robot
 Resource    techapp.robot
 Resource    plug.robot
 Resource    led.robot
-Resource    parse.robot
 
 Suite Setup     Suite start
 Suite Teardown  Suite end  
-
 Test Setup       Test start   
 Test Teardown    Test end
 
 *** Variables ***
-${BROWSER}      firefox    #headlessfirefox         #firefox
-${BUTTON_PUSHER}   'human'        #manual
+${BROWSER}      headlessfirefox    #headlessfirefox         #firefox
+${BUTTON_PUSHER}   'servo'        #human    #servo
+${LED_WATCHER}    'auto'    #human    #auto
 ${BLOCKPORT}   0
-@{INFOS}    noPrnt.ApplianceState    noPrnt.DoorState   noPrnt.SensorTemperature[3]    #apname, model, pnc, serial, Link Quality, NIUX Firmware Version, NIUX SW ANC version
-
-&{DICT}  name=value
+&{INFOS}    model=model    pnc=pnc    serial=noPrnt.SerialNumber    LinkQuality=noPrnt.LinkQualityIndicator    NiuFirmwareVersion=noPrnt.SwVersion    NiuSWANCversion=noPrnt.NiuSwUpdateCurrentDescription    TechAppVersion=TechAppVersion    MacAddress=noPrnt.MacAddress    apname=apname    
+&{DICT}    name=value
+${ROUTERAPNAME}    NETGEAR09
+${ROUTERAPPWD}    bluephoenix200
 
 *** Keywords ***
 Suite start
-    Sleep    0
-    Set Global Variable    ${dict}    ()
     Set Library Search Order  AppiumLibrary  SeleniumLibrary
-    router.Start
-    buttons.Start   
+    buttons.Start
+    techapp.Start
+    Total factory reset
 
 Suite end
-    Sleep    0 
-    router.End
+    No operation 
 
 Test start
-    Sleep     0
+    router.Start
     buttons.Release all
     plug.On
     techapp.Start
     
 Test end
-    Sleep     0
     Run Keyword if  '${BLOCKPORT}'!='0'    router.block port   0 
     techapp.End
+    router.End
+
+Appliance factory reset
+    buttons.Press   2   11
+
+Appliance start broadcasting
+    buttons.Press   2   7  
 
 Onboarding
     [Arguments]   ${apname}   ${appass}
-    buttons.Press   2   7  
+    Appliance start broadcasting  
     techapp.Onboarding     ${apname}     ${appass}
 
-Deregister
-    techapp.Choose appliance
-    techapp.Deregister
-    buttons.Press    2    11
+Total factory reset
+    Appliance factory reset
+    techapp.Delink
 
-*** Comments ***
-#*** Test Cases ***
+Provisioning
+    [Arguments]   ${apname}   ${appass}
+    Onboarding   ${apname}   ${appass}
+    techapp.Enrolling
+    techapp.Register
+    ${state}    techapp.Check appliance state
+    Log to console    ${state}
+
+*** Test Cases ***
 TC-100
     [Documentation]    Provisioning and register appliance
     ...                Expected result: Appliance  provisioning, WiFi led ON
     [Tags]    Provisioning
-    Onboarding   NETGEAR09   bluephoenix200
-    techapp.Enrolling
-    techapp.Register
-    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
+    Provisioning    ${ROUTERAPNAME}   ${ROUTERAPPWD}
+    techapp.Fill dictionary
     led.Check state    ON
-    Deregister
+    Total factory reset
 
 TC-109
     [Documentation]    Provisioning and register appliance using AP with special characters
     ...                Expected result: Appliance  provisioning (check appliance connectivity state), WiFi led ON
     [Tags]    Provisioning    
-    Onboarding   \!@#$%^*()-=_+{}[]|~`:;,.<> ?   \!@#$%^*()-=_+{}[]|~`:;,.<> ?
-    techapp.Enrolling
-    techapp.Register
-    techapp.Wait until element   com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
-
+    Provisioning   \!@#$%^*()-=_+{}[]|~`:;,.<> ?   \!@#$%^*()-=_+{}[]|~`:;,.<> ?
+    
 TC-200
     [Documentation]    Check appliance communicate with the cloud
     ...                Expected result: Appliance  communicate with the cloud, WiFi led ON
     [Tags]    Operate    
     techapp.Choose appliance
-    #buttons.Press    1    0
     techapp.Find parameter   noPrnt.ExecuteCommand
     techapp.eclick    //*[contains(@text,"noPrnt.ExecuteCommand")]
     techapp.eclick    //*[contains(@text,"1 (ON)")]
     techapp.eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
-    Sleep  5s
+    techapp.eclick  //android.widget.ImageButton[@content-desc="Navigate up"]  
+    techapp.Choose appliance
     techapp.Find parameter   noPrnt.ExecuteCommand
     techapp.eclick    //*[contains(@text,"noPrnt.ExecuteCommand")]
     techapp.eclick    //*[contains(@text,"0 (OFF)")]
     techapp.eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
     techapp.eclick  //android.widget.ImageButton[@content-desc="Navigate up"]  
 
-
 TC-101
     [Documentation]    Check offboarding
     ...                Expected result: Appliance offboarding, WiFi led OFF
     [Tags]    Provisioning    
-    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
-    Deregister
+    techapp.Check appliance state
+    Total factory reset
     led.Check state    OFF
 
 TC-121
     [Documentation]    Onboarding with wrong password
     ...                Expected result: Appliance  not provisioning, WiFi led OFF (after 30 sec max), Error ECPW002
     [Tags]    Onboarding    
-    Onboarding     NETGEAR09   WRONG_PASSWORD
+    Onboarding     ${ROUTERAPNAME}   WRONG_PASSWORD
     techapp.Check error    Error ECPW002
     led.Check state    OFF
 
@@ -117,7 +121,7 @@ TC-102
     [Documentation]    Onboarding with short password
     ...                Expected result: Appliance  not provisioning, WiFi led OFF (after 30 sec max), Error ECPW008
     [Tags]    Onboarding    
-    Onboarding     NETGEAR09   SHORT
+    Onboarding     ${ROUTERAPNAME}   SHORT
     techapp.Check error    Error ECPW008
     led.Check state    OFF
 
@@ -127,10 +131,10 @@ TC-105
     [Tags]    Enrolling    
     Set Test Variable   ${BLOCKPORT}   443
     router.block port   ${BLOCKPORT}
-    Onboarding     NETGEAR09   bluephoenix200
+    Onboarding     ${ROUTERAPNAME}   ${ROUTERAPPWD}
     techapp.Enrolling
     techapp.Check error    Error ECPW103
-    buttons.Press   2   11
+    Appliance factory reset
     led.Check state   OFF
 
 TC-103
@@ -139,28 +143,18 @@ TC-103
     [Tags]    Enrolling    
     Set Test Variable   ${BLOCKPORT}    65535
     router.block port   ${BLOCKPORT}
-    Onboarding     NETGEAR09   bluephoenix200
+    Onboarding     ${ROUTERAPNAME}   ${ROUTERAPPWD}
     techapp.Enrolling
     techapp.Check error    Error ECPW108
-    buttons.Press   2   11
+    Appliance factory reset
     led.Check state    OFF    
 
-*** Test Cases ***
-prsxml
-    parse.Source    Source here 
-    FOR  ${info}    IN     @{INFOS}
-    Log to console    ${info} : ${dict}[${info}]
-    #Log to console  ${interesting} ${dict}
-    #Try    ${xml}
-    END
-
-*** Comments ***
 TC-106
     [Documentation]    Powercycle during onboarding before enter Wifi credentials
     ...                Expected result: Appliance  not provisioning, AP turn off, WiFi led OFF
     [Tags]    Onboarding    
-    buttons.Press   2   7  
-    techapp.Onboarding choose AP   NETGEAR09
+    Appliance start broadcasting  
+    techapp.Onboarding choose AP   ${ROUTERAPNAME}
     plug.Off
     Sleep    5s
     plug.On
@@ -170,7 +164,7 @@ TC-107
     [Documentation]    Powercycle during onboarding after enter Wifi credentials
     ...                Expected result: Appliance  not provisioning, AP turn off, WiFi led OFF
     [Tags]    Onboarding    
-    Onboarding   NETGEAR09   bluephoenix200
+    Onboarding   ${ROUTERAPNAME}   ${ROUTERAPPWD}
     plug.Off
     Sleep    5s
     plug.On
@@ -180,7 +174,7 @@ TC-108
     [Documentation]    Powercycle in 10 sec after starting enrolling process
     ...                Expected result: Appliance provisioning, WiFi led ON
     [Tags]    Enrolling    
-    Onboarding   NETGEAR09   bluephoenix200
+    Onboarding   ${ROUTERAPNAME}   ${ROUTERAPPWD}
     techapp.Enrolling
     Sleep  10s
     plug.Off
@@ -207,7 +201,7 @@ TC-200
     plug.Off
     Sleep  10s
     plug.On
-    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
+    techapp.Check appliance state
     led.Check state    ON
 
 TC-201
@@ -218,7 +212,7 @@ TC-201
     Log to console     Wait for 10 min
     Sleep  10m
     plug.On
-    techapp.Check element    com.electrolux.ecp.client.sdk.app.selector:id/appliance_connectivity
+    techapp.Check appliance state
     led.Check state   ON
 
 TC-104
@@ -227,7 +221,7 @@ TC-104
     [Tags]    Onboarding    
     router.Turn off DHCP server
     Sleep    10s
-    Onboarding   NETGEAR09   bluephoenix200
+    Onboarding   ${ROUTERAPNAME}   ${ROUTERAPPWD}
     techapp.Check error    Error ECPW005
     router.Turn on DHCP server
     led.Check state    OFF

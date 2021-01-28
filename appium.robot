@@ -1,6 +1,6 @@
 *** Settings ***
-Library               AppiumLibrary       15      run_on_failure=Log Source
-Library               Process
+#Library               AppiumLibrary       15      run_on_failure=Log Source
+Library               OperatingSystem
 
 Suite Setup           Spawn Appium Server
 Suite Teardown        Close Appium Server
@@ -20,9 +20,7 @@ ${ALIAS}                  Android
 
 *** Keywords ***
 Start Appium
-  Sleep  1s
-  #Process.Start Process    appium      stdout=appium_stdout.txt   
-  #-a 127.0.0.1 -p 4723  --shell  --session-override
+  ${rc}   ${output} =             Run and Return RC and Output    appium
 
 Close Appium
     Sleep  1s

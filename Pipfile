@@ -8,6 +8,9 @@ robotframework = "*"
 robotframework-consoledialogs = "*"
 robotframework-seleniumlibrary = "*"
 robotframework-appiumlibrary = "*"
+urllib3 = "*"
+requests = "*"
+chardet = "*"
 
 [dev-packages]
 
