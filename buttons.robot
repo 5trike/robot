@@ -12,7 +12,6 @@ ${URL_BUTTONS}          http://192.168.1.2/
 
 *** Keywords ***
 Start
-#    SeleniumLibrary.Open Browser    ${URL_BUTTONS}  	${BROWSER} 
     Sleep  0s
 
 Press
@@ -41,9 +40,9 @@ Perform button
 
 Use servo
     [Arguments]   ${btnAction}    ${holdsec}=0
-    SeleniumLibrary.Go To    ${URL_BUTTONS}
+    SeleniumLibrary.Go to     ${URL_BUTTONS}   
     SeleniumLibrary.Click Element    ${btnAction}
-    SeleniumLibrary.Click Element    ${btnAction}
+    #SeleniumLibrary.Click Element    ${btnAction}
 
 
 Use muscles

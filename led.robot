@@ -3,8 +3,8 @@ Library  ConsoleDialogs
 
 *** Keywords ***
 Check state
-    [Arguments]   ${ExLedState}    
-    Run Keyword If    ${LED_WATCHER}=='auto'    Use auto    ${ExLedState}
+    [Arguments]   ${ExLedState}    ${WATCHER}=${LED_WATCHER}
+    Run Keyword If    ${WATCHER}=='auto'    Use auto    ${ExLedState}
     ...   ELSE    Use eyes   ${ExLedState}
 
     

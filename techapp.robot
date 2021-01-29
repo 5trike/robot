@@ -252,24 +252,13 @@ Fill dictionary
     END
     AppiumLibrary.Click Element  ${navigateUp}
 
-
-*** Test Cases ***
+*** Comments ***  
+#*** Test Cases ***
 Selftest
     Start
     #Choose appliance
     Sleep  5s
     End
 
-*** Comments ***    
-    eclick  ${navigateUp}
-    Sleep  5s
-    Choose appliance
-    Find parameter   noPrnt.ExecuteCommand
-    eclick    //*[contains(@text,"noPrnt.ExecuteCommand")]
-    eclick    //*[contains(@text,"1 (ON)")]
-    eclick    ${positiveBtn}    
-    Sleep  20s
-    eclick    //*[contains(@text,"noPrnt.ExecuteCommand")]
-    eclick    //*[contains(@text,"0 (OFF)")]
-    eclick    ${positiveBtn} 
-    Sleep  20s
+  
+
