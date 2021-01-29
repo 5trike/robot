@@ -17,7 +17,7 @@ Start
 Press
     [Arguments]   ${btnnum}    ${holdsec}=0
     ${btnAction}=    Set Variable  button_${btnnum}_press
-    ${holdcorrect}=    Evaluate   ${holdsec}-1   #need 1 sec for operate browser
+    ${holdcorrect}=    Evaluate   ${holdsec}+2   #need 1 sec for operate browser
     ${holdsec}=   Set Variable If    ${BUTTON_PUSHER}=='servo'    ${holdcorrect}    ${holdsec}
     Perform button    ${btnAction}    ${holdsec}
     Sleep    ${holdsec}

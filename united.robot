@@ -1,5 +1,6 @@
 *** Settings ***
 Library     ConsoleDialogs
+Library    Collections
 Library     BuiltIn
 Resource    router.robot
 Resource    techapp.robot
@@ -19,18 +20,22 @@ ${BUTTON_PUSHER}   'servo'        #human    #servo
 ${LED_WATCHER}    'human'    #human    #auto
 ${BLOCKPORT}   0
 &{INFOS}    model=model    pnc=pnc    serial=noPrnt.SerialNumber    LinkQuality=noPrnt.LinkQualityIndicator    NiuFirmwareVersion=noPrnt.SwVersion    NiuSWANCversion=noPrnt.NiuSwUpdateCurrentDescription    TechAppVersion=TechAppVersion    MacAddress=noPrnt.MacAddress    apname=apname    
-&{DICT}    name=value
+&{DICT}    state=unk
 ${ROUTERAPNAME}    NETGEAR09
 ${ROUTERAPPWD}    bluephoenix200
+${EVENTMODE}    0201004800
+
 
 *** Keywords ***
 Suite start
     Set Library Search Order  AppiumLibrary  SeleniumLibrary
-    router.Start
-    plug.On
-    techapp.Start
-    Reset and delink
-
+    #${isResetneed}     Get Selection From User     Need factory reset   YES   NO
+    #router.Start
+    #buttons.Release all
+    #plug.On
+    #techapp.Start
+    #Run keyword if     '${isResetneed}'=='YES'    Reset and delink
+    
 Suite end
     router.End
 
@@ -51,7 +56,7 @@ Start Broadcasting
     buttons.Press   2   6 
 
 Onboarding
-    [Arguments]   ${apname}   ${appass}
+    [Arguments]    ${apname}=${ROUTERAPNAME}   ${appass}=${ROUTERAPPWD}
     Start broadcasting  
     techapp.Onboarding     ${apname}     ${appass}
 
@@ -61,12 +66,10 @@ Reset and delink
     Sleep    5s
 
 Provisioning
-    [Arguments]   ${apname}   ${appass}
-    Onboarding   ${apname}   ${appass}
+    Onboarding
     techapp.Enrolling
     techapp.Register
-    ${state}    techapp.Check appliance state
-    Return from keyword    ${state}
+    techapp.Check appliance state
 
 Initcheck
     Sleep   0
@@ -85,14 +88,24 @@ Powercycle
 *** Test Cases ***
 #Selftest
 #    Initcheck
-
+TC-777
+    techapp.Choose appliance
+    techapp.Find parameter   noPrnt.SchedulerEventFriday
+    #techapp.RadioBtn    noPrnt.ClearSchedule    3 (All)
+    #techapp.Set event    noPrnt.SchedulerEventFriday    5    2
+    #techapp.Set event    noPrnt.SchedulerEventFriday    8    2
+    #techapp.Set event    noPrnt.SchedulerEventOnce    2    2    05    05
+    #techapp.Set event    noPrnt.SchedulerEventFriday  5    2
+    #techapp.Set event    noPrnt.SchedulerEventOnce    24    5
+ 
+*** Comments ***
 TC-100
-    [Documentation]    Provisioning and register appliance
+    [Documentation]    Factory reset, provisioning and register appliance
     ...                Expected result: Appliance  provisioning, WiFi led ON
     [Tags]    Provisioning
-    Provisioning    ${ROUTERAPNAME}   ${ROUTERAPPWD}
+    Factory Reset
+    techapp.Choose appliance    #Provisioning    
     techapp.Fill dictionary
-    Log to console     ${state}
     #led.Check state    ON
     Reset and delink
 
@@ -123,18 +136,9 @@ TC-201
     [Documentation]    Check appliance communicate with the cloud
     ...                Expected result: Appliance  communicate with the cloud, WiFi led ON
     [Tags]    Operate    
-    techapp.Choose appliance
-    techapp.Find parameter   noPrnt.ExecuteCommand
-    techapp.eclick    //*[contains(@text,"noPrnt.ExecuteCommand")]
-    techapp.eclick    //*[contains(@text,"1 (ON)")]
-    techapp.eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
-    techapp.eclick  //android.widget.ImageButton[@content-desc="Navigate up"]  
-    techapp.Choose appliance
-    techapp.Find parameter   noPrnt.ExecuteCommand
-    techapp.eclick    //*[contains(@text,"noPrnt.ExecuteCommand")]
-    techapp.eclick    //*[contains(@text,"0 (OFF)")]
-    techapp.eclick    com.electrolux.ecp.client.sdk.app.selector:id/md_buttonDefaultPositive
-    techapp.eclick  //android.widget.ImageButton[@content-desc="Navigate up"]  
+    techapp.RadioBtn    noPrnt.ExecuteCommand    1 (On)
+    Sleep    3s
+    techapp.RadioBtn    noPrnt.ExecuteCommand    0 (Off)
 
 TC-101
     [Documentation]    Check offboarding
@@ -152,7 +156,6 @@ TC-121
     techapp.Check error    Error ECPW002
     #led.Check state    OFF
 
-
 TC-102
     [Documentation]    Onboarding with short password
     ...                Expected result: Appliance  not provisioning, WiFi led OFF (after 30 sec max), Error ECPW008
@@ -167,7 +170,7 @@ TC-105
     [Tags]    Enrolling    
     Set Test Variable   ${BLOCKPORT}   443
     router.block port   ${BLOCKPORT}
-    Onboarding     ${ROUTERAPNAME}   ${ROUTERAPPWD}
+    Onboarding    
     techapp.Enrolling
     techapp.Check error    Error ECPW103
     Reset and delink
@@ -179,7 +182,7 @@ TC-103
     [Tags]    Enrolling    
     Set Test Variable   ${BLOCKPORT}    65535
     router.block port   ${BLOCKPORT}
-    Onboarding     ${ROUTERAPNAME}   ${ROUTERAPPWD}
+    Onboarding    
     techapp.Enrolling
     techapp.Check error    Error ECPW108
     Reset and delink
@@ -200,7 +203,7 @@ TC-107
     [Documentation]    Powercycle during onboarding after enter Wifi credentials
     ...                Expected result: Appliance  not provisioning, AP turn off, WiFi led OFF
     [Tags]    Onboarding    
-    Onboarding   ${ROUTERAPNAME}   ${ROUTERAPPWD}
+    Onboarding  
     plug.Off
     Sleep    5s
     plug.On
@@ -210,7 +213,7 @@ TC-108
     [Documentation]    Powercycle in 10 sec after starting enrolling process
     ...                Expected result: Appliance provisioning, WiFi led ON
     [Tags]    Enrolling    
-    Onboarding   ${ROUTERAPNAME}   ${ROUTERAPPWD}
+    Onboarding   
     techapp.Enrolling
     Sleep  10s
     plug.Off
@@ -242,7 +245,7 @@ TC-104
     [Tags]    Onboarding    
     router.Turn off DHCP server
     Powercycle    30s
-    Onboarding   ${ROUTERAPNAME}   ${ROUTERAPPWD}
+    Onboarding  
     techapp.Check error    Error ECPW005
     router.Turn on DHCP server
     Powercycle    30s
