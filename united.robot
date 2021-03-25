@@ -23,7 +23,9 @@ ${BLOCKPORT}   0
 &{DICT}    state=unk
 ${ROUTERAPNAME}    NETGEAR09
 ${ROUTERAPPWD}    bluephoenix200
+${EVENT}    
 ${EVENTMODE}    0201004800
+${SN}    61604241
 
 
 *** Keywords ***
@@ -37,16 +39,17 @@ Suite start
     #Run keyword if     '${isResetneed}'=='YES'    Reset and delink
     
 Suite end
-    router.End
+    #router.End
+    No operation
 
 Test start
-    router.Start
+    #router.Start
     techapp.Start
     
 Test end
-    Run Keyword if  '${BLOCKPORT}'!='0'    router.Block port   0 
+    #Run Keyword if  '${BLOCKPORT}'!='0'    router.Block port   0 
     techapp.End
-    router.End
+    #router.End
 
 Factory Reset
     buttons.Press   2   11
@@ -86,17 +89,28 @@ Powercycle
     plug.On
 
 *** Test Cases ***
-#Selftest
-#    Initcheck
 TC-777
-    techapp.Choose appliance
-    techapp.Find parameter   noPrnt.SchedulerEventFriday
-    #techapp.RadioBtn    noPrnt.ClearSchedule    3 (All)
-    #techapp.Set event    noPrnt.SchedulerEventFriday    5    2
-    #techapp.Set event    noPrnt.SchedulerEventFriday    8    2
-    #techapp.Set event    noPrnt.SchedulerEventOnce    2    2    05    05
-    #techapp.Set event    noPrnt.SchedulerEventFriday  5    2
-    #techapp.Set event    noPrnt.SchedulerEventOnce    24    5
+    #techapp.Choose appliance
+    #techapp.Find parameter   noPrnt.SchedulerEventFriday
+    techapp.RadioBtn    noPrnt.ClearSchedule    3 (All)
+    FOR    ${i}    IN RANGE    0    5
+        #Exit For Loop If    ${i} == 9
+        ${ii}    Evaluate    ${i}*2+1
+        #Log to console    ${ii}
+        ${tmp}    techapp.Get event    ${ii}    1
+        Set global variable    ${EVENT}    ${EVENT}${tmp}
+    END
+    ${EVENTonce}    techapp.Get event      2    2    05    05
+    techapp.Set event    Once    ${EVENTonce}
+    Log to console    ${EVENT}
+    techapp.Set event    Sunday    ${EVENT}
+    techapp.Set event    Monday    ${EVENT}
+    techapp.Set event    Tuesday    ${EVENT}
+    techapp.Set event    Wednesday    ${EVENT}
+    techapp.Set event    Thursday    ${EVENT}
+    techapp.Set event    Friday    ${EVENT}
+    techapp.Set event    Saturday    ${EVENT}
+    techapp.Set event    Once    ${EVENTonce}
  
 *** Comments ***
 TC-100

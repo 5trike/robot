@@ -37,12 +37,12 @@ Start
   ...   accept_next_alert=false
   ...   noReset=true
 
-  Capture Screen Recording
-  Login  eluxtester16@gmail.com  Elux123456  NA  LATAM stage  Frigidaire
+  #Capture Screen Recording
+  Login  eluxtester1@gmail.com  Elux123456  NA  LATAM stage  Frigidaire
 
 End
-  End Screen Recording
-  Save logcat
+  #End Screen Recording
+  #Save logcat
   AppiumLibrary.Close Application
   Sleep  5s
 
@@ -81,8 +81,9 @@ Input credentials
   einput   com.electrolux.ecp.client.sdk.app.selector:id/edit_text_country  ${country}    
   AppiumLibrary.Input text  com.electrolux.ecp.client.sdk.app.selector:id/edit_text_password  ${userpass}
   AppiumLibrary.Hide Keyboard
-  AppiumLibrary.Click Element    com.electrolux.ecp.client.sdk.app.selector:id/button_space  
-  AppiumLibrary.Wait Until Element Is Visible    //*[contains(@text,"${space}")]
+  AppiumLibrary.Click Element    com.electrolux.ecp.client.sdk.app.selector:id/button_space 
+  Find parameter     ${space}
+  #AppiumLibrary.Wait Until Element Is Visible    //*[contains(@text,"${space}")]
   AppiumLibrary.Click Element   //*[contains(@text,"${space}")]
   AppiumLibrary.Click Element  com.electrolux.ecp.client.sdk.app.selector:id/button_brand
   eclick    //*[contains(@text,"${brand}")]
@@ -164,14 +165,15 @@ Delete offline appliance
     eclick    //*[contains(@text, 'Delete Appliance')]
     Set To Dictionary    ${DICT}    state    emptylist 
 
-Choose appliance
+Choose appliance    
+    [Arguments]   ${serial}=${SN}
     Check appliance state
     #Log to console     ${DICT}[state]
     Run keyword if    '${DICT}[state]'=='offline'   Delete offline appliance
     #Log to console     ${DICT}[state]
     Run keyword if    '${DICT}[state]'=='emptylist'    Provisioning 
     #Log to console     ${DICT}[state]
-    Run keyword if    '${DICT}[state]'=='registered'    eclick    ${applianceOnline} 
+    Run keyword if    '${DICT}[state]'=='registered'    eclick    //*[contains(@text, '${serial}')]
     #Log to console     ${DICT}[state]
 
 Wait until text   
@@ -216,6 +218,7 @@ Scroll Down If Element Not Found
 Find parameter
     [Arguments]   ${text}    ${isUpdateDict}=false
     Run keyword if    '${isUpdateDict}'=='true'    Update dictionary
+    Sleep    1s
     ${isFind}     Run Keyword And Return Status    Page Should Contain Element    //*[contains(@text,"${text}")]
     Run keyword Unless    ${isFind}    BuiltIn.Wait Until Keyword Succeeds    10x    100ms    Scroll Down If Element Not Found   ${text}    ${isUpdateDict}
     Sleep    2s
@@ -262,11 +265,11 @@ Hex Convert
     Return from keyword     ${hex}
 
 Get event
-    [Arguments]    ${startincrement}    ${duration}    ${onedaystart}    ${onedayend}    ${mode}
+    [Arguments]    ${startincrement}    ${duration}    ${onedaystart}=    ${onedayend}=    ${mode}=${EVENTMODE}
     ${start}    Calculate start    ${startincrement}       ${onedaystart}     ${mode}
     ${stop}    Run keyword If    '${duration}'!='-1'    Calculate stop    ${startincrement}    ${duration}    ${onedayend}    ${mode}
     ${event}    Set variable    ${start}${stop}     #${startHour}${startMin}040201004800${stopHour}${stopMin}040201004800
-    Log to console    ${event}
+    #Log to console    ${event}
     [Return]    ${event} 
 
 Calculate start
@@ -275,7 +278,7 @@ Calculate start
     ${startHour}    Hex Convert    ${startTime.hour}
     ${startMin}    Hex Convert    ${startTime.minute}
     ${start}   Set Variable    ${startHour}${startMin}01${mode}${onedaystart}
-    Log to console    ${startTime.hour}:${startTime.minute}
+    #Log to console    ${startTime.hour}:${startTime.minute}
     Return from Keyword    ${start}
 
 Calculate stop
@@ -298,12 +301,12 @@ RadioBtn
     techapp.eclick    ${navigateUp}
 
 Set event
-    [Arguments]    ${name}    ${startincrement}    ${duration}    ${onedaystart}=    ${onedayend}=    ${mode}=${EVENTMODE}
+    [Arguments]    ${name}    ${event}
+    Set variable    ${name}    noPrnt.SchedulerEvent${name}
     techapp.Choose appliance
-    Log to console     ${name}
     techapp.Find parameter   ${name}
     techapp.eclick    //*[contains(@text,"${name}")]
-    ${event}    techapp.Get event    ${startincrement}    ${duration}    ${onedaystart}    ${onedayend}    ${mode}   
+    #${event}    techapp.Get event    ${startincrement}    ${duration}    ${onedaystart}    ${onedayend}    ${mode}   
     techapp.einput    com.electrolux.ecp.client.sdk.app.selector:id/hexInput    ${event}
     techapp.eclick    ${positiveBtn}
     techapp.eclick    ${navigateUp}
