@@ -34,7 +34,7 @@ Start
   ...   clearDeviceLogsOnStart=true
   ...   session-override=true
   ...   autoGrantPermissions=true
-  ...   accept_next_alert=false
+  ...   accept_next_alert=true
   ...   noReset=true
 
   #Capture Screen Recording
@@ -264,6 +264,15 @@ Hex Convert
     ${hex}    Set variable    ${hex}[-2:]
     Return from keyword     ${hex}
 
+Calc events
+        FOR    ${i}    IN RANGE    0    2
+        #Exit For Loop If    ${i} == 9
+        ${ii}    Evaluate    ${i}*2+1
+        #Log to console    ${ii}
+        ${tmp}    techapp.Get event    ${ii}    1
+        Set global variable    ${EVENT}    ${EVENT}${tmp}
+    END
+
 Get event
     [Arguments]    ${startincrement}    ${duration}    ${onedaystart}=    ${onedayend}=    ${mode}=${EVENTMODE}
     ${start}    Calculate start    ${startincrement}       ${onedaystart}     ${mode}
@@ -288,7 +297,7 @@ Calculate stop
     ${stopHour}    Hex Convert    ${stopTime.hour}
     ${stopMin}    Hex Convert    ${stopTime.minute}
     ${stop}    Set Variable     ${stopHour}${stopMin}00${mode}${onedayend}
-    Log to console    ${stopTime.hour}:${stopTime.minute}
+    #Log to console    ${stopTime.hour}:${stopTime.minute}
     Return from keyword    ${stop}
 
 RadioBtn
@@ -304,12 +313,15 @@ Set event
     [Arguments]    ${name}    ${event}
     Set variable    ${name}    noPrnt.SchedulerEvent${name}
     techapp.Choose appliance
+    ConsoleDialogs.Pause Execution  message=Hit [Return] to continue.
     techapp.Find parameter   ${name}
     techapp.eclick    //*[contains(@text,"${name}")]
     #${event}    techapp.Get event    ${startincrement}    ${duration}    ${onedaystart}    ${onedayend}    ${mode}   
     techapp.einput    com.electrolux.ecp.client.sdk.app.selector:id/hexInput    ${event}
     techapp.eclick    ${positiveBtn}
+    Sleep    3s
     techapp.eclick    ${navigateUp}
+
 
 *** Comments ***  
 #*** Test Cases ***

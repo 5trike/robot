@@ -26,7 +26,7 @@ ${ROUTERAPPWD}    bluephoenix200
 ${EVENT}    
 ${EVENTMODE}    0201004800
 ${SN}    61604241
-
+@{DAYS}    Sunday    Monday    Tuesday    Wednesday    Thursday    Friday    Saturday
 
 *** Keywords ***
 Suite start
@@ -93,24 +93,22 @@ TC-777
     #techapp.Choose appliance
     #techapp.Find parameter   noPrnt.SchedulerEventFriday
     techapp.RadioBtn    noPrnt.ClearSchedule    3 (All)
-    FOR    ${i}    IN RANGE    0    5
+    FOR    ${i}    IN RANGE    0    3
         #Exit For Loop If    ${i} == 9
         ${ii}    Evaluate    ${i}*2+1
-        #Log to console    ${ii}
+        #Log to console    ${i}
         ${tmp}    techapp.Get event    ${ii}    1
+        #Log to console    ${tmp}
         Set global variable    ${EVENT}    ${EVENT}${tmp}
     END
     ${EVENTonce}    techapp.Get event      2    2    05    05
-    techapp.Set event    Once    ${EVENTonce}
+    #techapp.Set event    Once    ${EVENTonce}
     Log to console    ${EVENT}
-    techapp.Set event    Sunday    ${EVENT}
-    techapp.Set event    Monday    ${EVENT}
-    techapp.Set event    Tuesday    ${EVENT}
-    techapp.Set event    Wednesday    ${EVENT}
-    techapp.Set event    Thursday    ${EVENT}
-    techapp.Set event    Friday    ${EVENT}
-    techapp.Set event    Saturday    ${EVENT}
-    techapp.Set event    Once    ${EVENTonce}
+    FOR     ${day}    IN     @{DAYS}
+        Log to console    ${day}
+        techapp.Set event    ${day}    ${EVENT}
+    END
+    #techapp.Set event    Once    ${EVENTonce}
  
 *** Comments ***
 TC-100
